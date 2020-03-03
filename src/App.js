@@ -27,14 +27,85 @@ const initialTodos = [
 
 const App = () => {
   const [todosArray, setTodosArray] = useState(initialTodos);
+  const [todoText, setTodoText] = useState('');
+
+  const toggleTodo = (id) => {
+    setTodosArray(todosArray.map(t => {
+      return t.id === id ? { ...t, done: !t.done } : t;
+    }));
+  };
+
+  const addTodo = () => {
+    if (todoText.trim() !== '') {
+      setTodosArray([
+        ...todosArray,
+        { id: Date.now(), title: todoText, done: false }
+      ]);
+      setTodoText('');
+    }
+  };
+
+  const clearDone = () => {
+    setTodosArray(todosArray.filter(todo => !todo.done));
+  };
+
   return (
     <div>
       <header className={styles.header}>
         <h1>TODO Tracker</h1>
       </header>
       <main className={styles.main}>
-        TODO: TODO's
+        <form
+          className={styles.todoForm}
+          onSubmit={e => {
+            e.preventDefault();
+            addTodo();
+          }}
+        >
+          <input
+            name="todo"
+            placeholder="Write your todo..."
+            className={styles.todoInput}
+            value={todoText}
+            onChange={event => setTodoText(event.target.value)}
+          />
+          <button type="submit" className={styles.add}>
+            Add
+          </button>
+          <button
+            type="button"
+            className={styles.clear}
+            onClick={clearDone}
+          >
+            Clear
+          </button>
+        </form>
+        <TodoList>
+          {todosArray.map(todo => (
+            <Todo key={todo.id} todo={todo} toggleTodo={toggleTodo} />
+          ))}
+        </TodoList>
       </main>
+    </div>
+  );
+};
+
+const TodoList = ({ children }) => {
+  return (
+    <div className={styles.todoList}>
+      {children}
+    </div>
+  );
+};
+
+const Todo = ({ todo, toggleTodo }) => {
+  return (
+    <div
+      key={todo.id}
+      className={cn(styles.todo, todo.done && styles.done)}
+      onClick={() => toggleTodo(todo.id)}
+    >
+      {todo.title}
     </div>
   );
 };
